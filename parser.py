@@ -218,12 +218,10 @@ def p_join(t):
             | join INNER JOIN ident ON expr
             | join CROSS JOIN ident
     '''
-    print("URA!")
     if len(t) == 2:
-        print("URA!!!")
-        print(t[1])
         t[0] = t[1]
     else:
+        print("URA!")
         cond = t[6] if len(t) > 6 else None
         t[0] = JoinNode(Join(t[2]), t[1], t[4], cond)
 

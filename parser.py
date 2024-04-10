@@ -12,7 +12,7 @@ tokens = [
     'EQUALS', 'NOTEQUALS',
     'GT_INPUT', 'LT_OUTPUT',
     'OR', 'AND', 'NOT',
-    'COMMA'
+    'COMMA', 'DOT'
 ]
 
 reserved = {
@@ -58,7 +58,7 @@ t_RBRACE = r'}'
 t_SEMICOLON = r';'
 t_GT = r'>'
 t_LT = r'<'
-t_EQUALS = r'=='
+t_EQUALS = r'='
 t_NOTEQUALS = r'!='
 t_GE = r'>='
 t_LE = r'<='
@@ -68,6 +68,7 @@ t_NOT = r'!'
 t_GT_INPUT = r'>>'
 t_LT_OUTPUT = r'<<'
 t_COMMA = r','
+t_DOT = r'.'
 
 t_ignore = ' \r\t'
 
@@ -168,7 +169,7 @@ def p_mult(t):
 
 
 def p_add(t):
-    ''' add :  mult
+    ''' add : mult
              | add ADD mult
              | add SUB mult
     '''
@@ -210,9 +211,17 @@ def p_expr(t):
     t[0] = t[1]
 
 
+def p_join_cond(t):
+    ''' join_cond :
+                | join_cond ident EQUALS ident
+    '''
+    if len(t) == 5:
+        pass
+
+
 def p_join(t):
     ''' join : ident
-            | join LEFT JOIN ident ON expr
+            | join LEFT JOIN ident ON join_cond
             | join RIGHT JOIN ident ON expr
             | join FULL JOIN ident ON expr
             | join INNER JOIN ident ON expr
@@ -221,26 +230,25 @@ def p_join(t):
     if len(t) == 2:
         t[0] = t[1]
     else:
-        print("URA!")
         cond = t[6] if len(t) > 6 else None
         t[0] = JoinNode(Join(t[2]), t[1], t[4], cond)
 
 
 # 4
-def p_exprs0(t):  # с помощью этого разбирается множество параметров
-    ''' exprs0 : expr
-            | exprs0 COMMA expr '''
+def p_separate_exprs(t):  # с помощью этого разбирается множество параметров
+    ''' separate_exprs : expr
+            | separate_exprs COMMA expr '''
     t[0] = [*t[1], t[3]] if len(t) > 2 else [t[1]]
 
 
 # 3
 def p_exprs(t):
-    ''' exprs : exprs0 '''
+    ''' exprs : separate_exprs '''
     t[0] = ExprsNode(*t[1])
 
 
 # 2
-def p_select(t):
+def p_select(t):  # потом сюда добавлять все остальные операции: груп бай и тд
     ''' select : SELECT exprs FROM join WHERE expr '''
     t[0] = SelectNode(t[2], t[4], t[6])
 

@@ -5,18 +5,18 @@ from enum import Enum
 
 class AstNode(ABC):
     @property
-    def childs(self)->Tuple['AstNode', ...]:
+    def childs(self) -> Tuple['AstNode', ...]:
         return ()
 
     def add_child(self, *ch):
-        self.childs+=ch
+        self.childs += ch
 
     @abstractmethod
-    def __str__(self)->str:
+    def __str__(self) -> str:
         pass
 
     @property
-    def tree(self)->[str, ...]:
+    def tree(self) -> [str, ...]:
         res = [str(self)]
         childs = self.childs
         for i, child in enumerate(childs):
@@ -26,7 +26,7 @@ class AstNode(ABC):
             res.extend(((ch0 if j == 0 else ch) + ' ' + s for j, s in enumerate(child.tree)))
         return res
 
-    def visit(self, func: Callable[['AstNode'], None])->None:
+    def visit(self, func: Callable[['AstNode'], None]) -> None:
         func(self)
         map(func, self.childs)
 
@@ -47,7 +47,7 @@ class NumNode(ValueNode):
         super().__init__()
         self.num = float(num)
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         return str(self.num)
 
 
@@ -56,7 +56,7 @@ class IdentNode(ValueNode):
         super().__init__()
         self.name = str(name)
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         return str(self.name)
 
 
@@ -65,7 +65,7 @@ class BoolValueNode(ValueNode):
         super().__init__()
         self.name = str(name)
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         return str(self.name)
 
 
@@ -108,7 +108,7 @@ class BinOpNode(ValueNode):
     def childs(self) -> Tuple[ValueNode, ValueNode]:
         return self.arg1, self.arg2
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         return str(self.op.value)
 
 
@@ -127,7 +127,7 @@ class UnOpNode(ValueNode):
     def childs(self) -> Tuple[ValueNode]:
         return self.arg,
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         return str(self.op.value)
 
 
@@ -140,7 +140,7 @@ class Join(Enum):
 
 
 class JoinNode(AstNode):
-    def __init__(self, join: Join, table1: IdentNode, table2: IdentNode, cond: Optional[ExprNode]):
+    def __init__(self, join: Join, table1: IdentNode, table2: IdentNode, cond: Optional[BinOpNode]):  # ExprNode
         super().__init__()
         self.join = join
         self.table1 = table1
@@ -148,10 +148,14 @@ class JoinNode(AstNode):
         self.cond = cond
 
     @property
-    def childs(self) -> Tuple[ExprNode]:
-        return (self.table1, self.table2) + (self.cond, ) if self.cond else ()
+    def childs(self):  # -> Tuple[ExprNode]:
+        result = [self.table1, self.table2]
+        if self.cond:
+            result.append(self.cond)
+        return tuple(result)
+        # return [self.table1, self.table2]  # + [self.cond] if self.cond else ()
 
-    def __str__(self)->str:
+    def __str__(self) -> str:
         return f'{self.join} join'
 
 
@@ -164,12 +168,13 @@ class ExprsNode(AstNode):
     def childs(self) -> Tuple[ExprNode]:
         return self.exprs
 
-    def __str__(self)->str:
-        return '...'
+    def __str__(self) -> str:
+        return 'columns'
 
 
 EMPTY_EXPR = NumNode(1)
 EMPTY_EXPRS = ExprsNode()
+
 
 class SelectNode(AstNode):
     def __init__(self, selects: ExprsNode, from_: Union[IdentNode, JoinNode],
@@ -184,10 +189,49 @@ class SelectNode(AstNode):
         self.order = order
 
     @property
-    def childs(self) -> Tuple[AstNode]:
-        return (self.selects, self.from_,
+    def childs(self): # -> Tuple[AstNode]:
+        return [self.selects, self.from_,
                 self.where or EMPTY_EXPR, self.group or EMPTY_EXPRS, self.having or EMPTY_EXPR,
-                self.order or EMPTY_EXPRS)
+                self.order or EMPTY_EXPRS]
 
     def __str__(self) -> str:
         return 'select'
+
+
+# todo: не нужен:
+class OtherSelectNode(AstNode):
+    def __init__(self, selects: ExprsNode, from_: Union[IdentNode, JoinNode],
+                 where: Optional[ExprNode] = None, group: Optional[ExprsNode] = None,
+                 having: Optional[ExprNode] = None, order: Optional[ExprsNode] = None):
+        super().__init__()
+        self.selects = selects
+        self.from_ = from_
+        self.where = where
+        self.group = group
+        self.having = having
+        self.order = order
+
+    @property
+    def childs(self):  # -> Tuple[AstNode]:
+        return [self.selects, self.from_,
+                self.where or EMPTY_EXPR, self.group or EMPTY_EXPRS, self.having or EMPTY_EXPR,
+                self.order or EMPTY_EXPRS]
+
+    def __str__(self) -> str:
+        return 'select'
+
+
+# todo: не нужен:
+class JoinConditionNode(AstNode):  # *exprs: ExprNode
+    def __init__(self, cond1: IdentNode, cond2: IdentNode, operation: ExprNode):  # капец вопросики
+        super().__init__()
+        self.cond1 = cond1
+        self.cond2 = cond2
+        self.operation = operation
+
+    @property
+    def childs(self):  # -> Tuple[ExprNode]:
+        return [self.cond1, self.cond2]
+
+    def __str__(self) -> str:
+        return f'{self.operation}'  # не уверен

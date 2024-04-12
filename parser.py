@@ -209,10 +209,6 @@ def p_expr(t):  # todo редактирую
     ''' expr : or
     '''
     t[0] = t[1]
-    # if len(t) == 2:
-    #     t[0] = t[1]
-    # elif len(t) == 3:
-    #     t[0] = UnOpNode(UnOp(t[1]), t[2])
 
 
 def p_join(t):
@@ -237,15 +233,13 @@ def p_column_name(t):
     if len(t) == 2:
         t[0] = t[1]
     elif len(t) == 4:
-        # t[0] = UnOpNode(UnOp(t[2]), t[3])
         t[0] = BinOpNode(BinOp(t[2]), t[1], t[3])
 
 
 def p_separated_exprs(t):  # с помощью этого разбирается множество параметров
     ''' separated_exprs : column_name
-            | separated_exprs COMMA expr '''
-    t[0] = [*t[1], t[3]] if len(t) > 2 else [t[1]]
-    # t[0] = [t[1], t[3]] if len(t) > 2 else [t[1]]
+            | separated_exprs COMMA separated_exprs '''
+    t[0] = [*t[1], *t[3]] if len(t) > 2 else [t[1]]
 
 
 def p_exprs(t):  # todo лишняя прослойка

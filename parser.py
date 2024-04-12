@@ -11,7 +11,7 @@ tokens = [
     'GT', 'LT', 'GE', 'LE',
     'EQUALS', 'NOTEQUALS',
     'GT_INPUT', 'LT_OUTPUT',
-    'OR', 'AND', 'NOT',
+    'OR', 'NOT',
     'COMMA', 'DOT'
 ]
 
@@ -41,7 +41,8 @@ reserved = {
     'order': 'ORDER',
     'select': 'SELECT',
     'from': 'FROM',
-    'and': 'AND'
+    'and': 'AND',
+    'as': 'AS'
 }
 
 tokens += reserved.values()
@@ -208,6 +209,10 @@ def p_expr(t):  # todo редактирую
     ''' expr : or
     '''
     t[0] = t[1]
+    # if len(t) == 2:
+    #     t[0] = t[1]
+    # elif len(t) == 3:
+    #     t[0] = UnOpNode(UnOp(t[1]), t[2])
 
 
 def p_join(t):
@@ -225,20 +230,35 @@ def p_join(t):
         t[0] = JoinNode(Join(t[2]), t[1], t[4], cond)  # а тут JoinNode
 
 
-def p_separate_exprs(t):  # с помощью этого разбирается множество параметров
-    ''' separate_exprs : expr
-            | separate_exprs COMMA expr '''
+def p_column_name(t):
+    ''' column_name : ident
+                | column_name AS ident
+    '''
+    if len(t) == 2:
+        t[0] = t[1]
+    elif len(t) == 4:
+        # t[0] = UnOpNode(UnOp(t[2]), t[3])
+        t[0] = BinOpNode(BinOp(t[2]), t[1], t[3])
+
+
+def p_separated_exprs(t):  # с помощью этого разбирается множество параметров
+    ''' separated_exprs : column_name
+            | separated_exprs COMMA expr '''
     t[0] = [*t[1], t[3]] if len(t) > 2 else [t[1]]
+    # t[0] = [t[1], t[3]] if len(t) > 2 else [t[1]]
 
 
-def p_exprs(t):
-    ''' exprs : separate_exprs '''
+def p_exprs(t):  # todo лишняя прослойка
+    ''' exprs : separated_exprs '''
     t[0] = ExprsNode(*t[1])
+    # t[0] = t[1]
 
 
-def p_select(t):  # потом сюда добавлять все остальные операции: груп бай и тд
-    ''' select : SELECT exprs FROM join WHERE expr '''
-    t[0] = SelectNode(t[2], t[4], t[6])
+def p_select(t):
+    # ''' select : SELECT exprs FROM join WHERE expr '''
+    ''' select : SELECT exprs FROM join '''
+    # t[0] = SelectNode(t[2], t[4], t[6])
+    t[0] = SelectNode(t[2], t[4])
 
 
 def p_error(t):
@@ -251,3 +271,7 @@ parser = yacc.yacc()
 def build_tree(s):
     result = parser.parse(s)
     return result.tree
+
+# todo потом сюда добавлять все остальные операции: груп бай и тд!!!!!!!
+# todo убрать, чтобы не было лишних генераций (типа единички)
+

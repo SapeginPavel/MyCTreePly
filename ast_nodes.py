@@ -83,6 +83,19 @@ class CallNode(ExprNode):
         return f'call {self.func}'
 
 
+class PseudonymNode(ExprNode):
+    def __init__(self, pseudonym: IdentNode):
+        self.pseudonym = pseudonym
+
+    @property
+    def childs(self) -> IdentNode:
+        return self.pseudonym
+
+    def __str__(self) -> str:
+        # return f'AS {self.pseudonym}'
+        return 'AS'
+
+
 class BinOp(Enum):
     ADD = '+'
     SUB = '-'
@@ -98,6 +111,7 @@ class BinOp(Enum):
     BIT_OR = '||'
     # BIR_AND = '&&'
     BIR_AND = 'and'
+    AS = 'as'
 
 
 class BinOpNode(ValueNode):
@@ -118,6 +132,7 @@ class BinOpNode(ValueNode):
 class UnOp(Enum):
     NOT = '!'
     SUB = '-'
+    AS = 'as'
 
 
 class UnOpNode(ValueNode):
@@ -188,7 +203,7 @@ class ExprsNode(AstNode):
         return self.exprs
 
     def __str__(self) -> str:
-        return 'exprs'
+        return '...'
 
 
 EMPTY_EXPR = NumNode(1)
@@ -215,42 +230,3 @@ class SelectNode(AstNode):
 
     def __str__(self) -> str:
         return 'select'
-
-
-# todo: не нужен:
-class OtherSelectNode(AstNode):
-    def __init__(self, selects: ExprsNode, from_: Union[IdentNode, JoinNode],
-                 where: Optional[ExprNode] = None, group: Optional[ExprsNode] = None,
-                 having: Optional[ExprNode] = None, order: Optional[ExprsNode] = None):
-        super().__init__()
-        self.selects = selects
-        self.from_ = from_
-        self.where = where
-        self.group = group
-        self.having = having
-        self.order = order
-
-    @property
-    def childs(self):  # -> Tuple[AstNode]:
-        return [self.selects, self.from_,
-                self.where or EMPTY_EXPR, self.group or EMPTY_EXPRS, self.having or EMPTY_EXPR,
-                self.order or EMPTY_EXPRS]
-
-    def __str__(self) -> str:
-        return 'select'
-
-
-# todo: не нужен:
-class JoinConditionNode(AstNode):  # *exprs: ExprNode
-    def __init__(self, cond1: IdentNode, cond2: IdentNode, operation: ExprNode):  # капец вопросики
-        super().__init__()
-        self.cond1 = cond1
-        self.cond2 = cond2
-        self.operation = operation
-
-    @property
-    def childs(self):  # -> Tuple[ExprNode]:
-        return [self.cond1, self.cond2]
-
-    def __str__(self) -> str:
-        return f'{self.operation}'  # не уверен

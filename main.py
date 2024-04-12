@@ -9,15 +9,20 @@ import os
 
 # todo: может, сначала джойны выводить? А потом столбцы?
 
+# s2 = '''
+#     select age, name, sur
+#         from table
+#         left join t2 on table.first == t2.second
+#         cross join t5
+#         where age > 7
+#         and age < 10
+#         and name == test
+# '''
+
 s2 = '''
-    select age, name, sur
-        from table 
-        left join t2 on table.first == t2.second
-        cross join t5
-        where age > 7 
-        and age < 10
-        and name == test
+    select age as a, name as n, surname as s from table
 '''
+
 
 # and age < 10
 

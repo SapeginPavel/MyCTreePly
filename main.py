@@ -13,8 +13,13 @@ s2 = '''
     select age, name, sur
         from table 
         left join t2 on table.first == t2.second
-        where age > 7
+        cross join t5
+        where age > 7 
+        and age < 10
+        and name == test
 '''
+
+# and age < 10
 
 # left join t2 on g = h
 # cross join t2

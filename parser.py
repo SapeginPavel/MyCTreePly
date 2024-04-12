@@ -40,7 +40,8 @@ reserved = {
     'by': 'BY',
     'order': 'ORDER',
     'select': 'SELECT',
-    'from': 'FROM'
+    'from': 'FROM',
+    'and': 'AND'
 }
 
 tokens += reserved.values()
@@ -64,7 +65,7 @@ t_NOTEQUALS = r'!='
 t_GE = r'>='
 t_LE = r'<='
 t_OR = r'\|\|'
-t_AND = r'&&'
+# t_AND = r'&&'
 t_NOT = r'!'
 t_GT_INPUT = r'>>'
 t_LT_OUTPUT = r'<<'
@@ -203,8 +204,9 @@ def p_or(t):
     t[0] = BinOpNode(BinOp(t[2]), t[1], t[3]) if len(t) > 2 else t[1]
 
 
-def p_expr(t):
-    ''' expr : or '''
+def p_expr(t):  # todo редактирую
+    ''' expr : or
+    '''
     t[0] = t[1]
 
 

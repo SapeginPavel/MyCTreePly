@@ -96,7 +96,8 @@ class BinOp(Enum):
     GT = '>'
     LT = '<'
     BIT_OR = '||'
-    BIR_AND = '&&'
+    # BIR_AND = '&&'
+    BIR_AND = 'and'
 
 
 class BinOpNode(ValueNode):

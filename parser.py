@@ -5,7 +5,6 @@ import ply.yacc as yacc
 tokens = [
     'NUMBER', 'IDENT',
     'ADD', 'SUB', 'MUL', 'DIV', 'MOD',
-    # 'ASSIGN',
     'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE',
     'SEMICOLON',
     'GT', 'LT', 'GE', 'LE',
@@ -52,7 +51,6 @@ t_SUB = r'-'
 t_MUL = r'\*'
 t_DIV = r'/'
 t_MOD = r'%'
-# t_ASSIGN = r'='
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_LBRACE = r'{'
@@ -61,12 +59,10 @@ t_SEMICOLON = r';'
 t_GT = r'>'
 t_LT = r'<'
 t_EQUALS = r'=='
-# t_EQUALS = r'='
 t_NOTEQUALS = r'!='
 t_GE = r'>='
 t_LE = r'<='
 t_OR = r'\|\|'
-# t_AND = r'&&'
 t_NOT = r'!'
 t_GT_INPUT = r'>>'
 t_LT_OUTPUT = r'<<'
@@ -205,14 +201,10 @@ def p_or(t):
     t[0] = BinOpNode(BinOp(t[2]), t[1], t[3]) if len(t) > 2 else t[1]
 
 
-def p_expr(t):  # todo редактирую
+def p_expr(t):
     ''' expr : or
     '''
     t[0] = t[1]
-    # if len(t) == 2:
-    #     t[0] = t[1]
-    # elif len(t) == 3:
-    #     t[0] = UnOpNode(UnOp(t[1]), t[2])
 
 
 def p_join(t):
@@ -301,20 +293,6 @@ def p_select(t):  # todo: ещё функции max, count, avg, sum ; дора�
             order_node = t[i + 2]  # todo
 
     t[0] = SelectNode(select_node, from_node, where_node, group_node, having_node, order_node)
-
-    # if len(t) == 5:
-    #     t[0] = SelectNode(t[2], t[4])
-    # elif t[5] == 'where':
-    #     if len(t) > 7 and t[7] == 'group':
-    #         exprs_node = t[2]
-    #         join_node = t[4]
-    #         where_node = t[6]
-    #         group_node = t[9]
-    #         t[0] = SelectNode(exprs_node, join_node, where_node, group_node)
-    #     else:
-    #         t[0] = SelectNode(t[2], t[4], t[6])
-    # elif t[5] == 'group':
-    #     t[0] = SelectNode(t[2], t[4], None, t[7])
 
 
 def p_error(t):

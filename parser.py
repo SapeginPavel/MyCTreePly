@@ -5,7 +5,7 @@ import ply.yacc as yacc
 tokens = [
     'NUMBER', 'IDENT',
     'ADD', 'SUB', 'MUL', 'DIV', 'MOD',
-    'ASSIGN',
+    # 'ASSIGN',
     'LPAREN', 'RPAREN', 'LBRACE', 'RBRACE',
     'SEMICOLON',
     'GT', 'LT', 'GE', 'LE',
@@ -50,7 +50,7 @@ t_SUB = r'-'
 t_MUL = r'\*'
 t_DIV = r'/'
 t_MOD = r'%'
-t_ASSIGN = r'='
+# t_ASSIGN = r'='
 t_LPAREN = r'\('
 t_RPAREN = r'\)'
 t_LBRACE = r'{'
@@ -59,6 +59,7 @@ t_SEMICOLON = r';'
 t_GT = r'>'
 t_LT = r'<'
 t_EQUALS = r'=='
+# t_EQUALS = r'='
 t_NOTEQUALS = r'!='
 t_GE = r'>='
 t_LE = r'<='
@@ -111,7 +112,6 @@ lexer = lex.lex()
 
 ########################################################################
 
-# 1
 def p_start(t):
     ''' start : select '''
     t[0] = t[1]
@@ -176,7 +176,6 @@ def p_add(t):
     t[0] = BinOpNode(BinOp(t[2]), t[1], t[3]) if len(t) > 2 else t[1]
 
 
-# 8
 def p_compare(t):
     ''' compare : add
             | add GE add
@@ -192,7 +191,6 @@ def p_compare(t):
     t[0] = BinOpNode(BinOp(t[2]), t[1], t[3]) if len(t) > 2 else t[1]
 
 
-# 7
 def p_and(t):
     ''' and : compare
             | and AND compare
@@ -208,7 +206,6 @@ def p_or(t):
     t[0] = BinOpNode(BinOp(t[2]), t[1], t[3]) if len(t) > 2 else t[1]
 
 
-# 5
 def p_expr(t):
     ''' expr : or '''
     t[0] = t[1]
@@ -257,20 +254,17 @@ def p_join(t):
         t[0] = JoinNode(Join(t[2]), t[1], t[4], cond)  # а тут JoinNode
 
 
-# 4
 def p_separate_exprs(t):  # с помощью этого разбирается множество параметров
     ''' separate_exprs : expr
             | separate_exprs COMMA expr '''
     t[0] = [*t[1], t[3]] if len(t) > 2 else [t[1]]
 
 
-# 3
 def p_exprs(t):
     ''' exprs : separate_exprs '''
     t[0] = ExprsNode(*t[1])
 
 
-# 2
 def p_select(t):  # потом сюда добавлять все остальные операции: груп бай и тд
     ''' select : SELECT exprs FROM join WHERE expr '''
     t[0] = SelectNode(t[2], t[4], t[6])

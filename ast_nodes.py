@@ -164,9 +164,6 @@ class JoinNode(AstNode):
         self.table1 = table1
         self.table2 = table2
         self.cond = cond
-        print("!JoinNode created!")
-        print("!JoinNode created!")
-        print("!JoinNode created!")
 
     @property
     def childs(self):  # -> Tuple[ExprNode]:
@@ -208,9 +205,6 @@ class SelectNode(AstNode):
         self.group = group
         self.having = having
         self.order = order
-        print("!SelectNode created!")
-        print("!SelectNode created!")
-        print("!SelectNode created!")
 
     @property
     def childs(self):  # -> Tuple[AstNode]:

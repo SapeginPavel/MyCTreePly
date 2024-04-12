@@ -12,7 +12,7 @@ import os
 s2 = '''
     select age, name, sur
         from table 
-        left join t2 on first == second
+        left join t2 on table.first == t2.second
         where age > 7
 '''
 

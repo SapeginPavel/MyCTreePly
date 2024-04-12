@@ -76,7 +76,7 @@ t_ignore = ' \r\t'
 
 # абстрактный идентификатор (просто комбинация символов, которую нужно парсить)
 def t_IDENT(t):
-    r'[a-zA-Z_][a-zA-Z0-9_]*'
+    r'[a-zA-Z_][a-zA-Z0-9_]*\.?[a-zA-Z0-9_]*'
     if t.value in reserved:
         t.type = reserved[t.value]
     return t
@@ -185,9 +185,6 @@ def p_compare(t):
             | add EQUALS add
             | add NOTEQUALS add
     '''
-    print("in compare")
-    for i in range(len(t)):
-        print(t[i])
     t[0] = BinOpNode(BinOp(t[2]), t[1], t[3]) if len(t) > 2 else t[1]
 
 
@@ -211,31 +208,6 @@ def p_expr(t):
     t[0] = t[1]
 
 
-# todo: !!!!!!!!!!!!!!!!!!!!!!!! ПОПРОБОВАТЬ нарисовать дерево, как оно должно строиться
-def p_join_cond(t):
-    ''' join_cond :
-                | ident EQUALS ident
-    '''
-    # todo: вместо EQUALS - compare !!!      | join_cond ident compare ident
-    print("refrg")
-    # t[0] = BinOpNode(BinOp(t[2]), t[1], t[3])
-    if len(t) == 1:
-        print("1")
-        t[0] = NumNode(2)
-    elif len(t) == 4:
-        print("2")
-        # t[0] = BinOpNode(BinOp(t[2]), t[1], t[3])
-        t[0] = NumNode(2)
-
-    # elif len(t) == 5:
-    #     print("3")
-    #     # t[0] = ConditionsNode(tuple[t[1], BinOpNode(BinOp(t[2]), t[1], t[3])])
-    #     # tup = tuple[*t[1], BinOpNode(BinOp(t[2]), t[1], t[3])]
-    #     # t[0] = ConditionsNode(tup)
-    #     tup = (t[1],) + (BinOpNode(BinOp(t[2]), t[1], t[3]),)  # формирование кортежа
-    #     t[0] = ConditionsNode(tup)
-
-
 def p_join(t):
     ''' join : ident
             | join LEFT JOIN ident ON expr
@@ -244,12 +216,9 @@ def p_join(t):
             | join INNER JOIN ident ON expr
             | join CROSS JOIN ident
     '''
-    for i in range(len(t)):
-        print(t[i])
     if len(t) == 2:
         t[0] = t[1]  # и тогда вернётся IdentNode
     else:
-        print("in join")
         cond = t[6] if len(t) > 6 else None
         t[0] = JoinNode(Join(t[2]), t[1], t[4], cond)  # а тут JoinNode
 

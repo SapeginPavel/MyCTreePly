@@ -83,19 +83,6 @@ class CallNode(ExprNode):
         return f'call {self.func}'
 
 
-class PseudonymNode(ExprNode):
-    def __init__(self, pseudonym: IdentNode):
-        self.pseudonym = pseudonym
-
-    @property
-    def childs(self) -> IdentNode:
-        return self.pseudonym
-
-    def __str__(self) -> str:
-        # return f'AS {self.pseudonym}'
-        return 'AS'
-
-
 class BinOp(Enum):
     ADD = '+'
     SUB = '-'
@@ -147,22 +134,6 @@ class UnOpNode(ValueNode):
 
     def __str__(self) -> str:
         return str(self.op.value)
-
-
-EMPTY_COND_EXPR = NumNode(404)
-
-
-class ConditionsNode(AstNode):
-    def __init__(self, conditions: Optional[tuple[BinOpNode]] = None):  # не знаю, можно ли так. Мб со звёздочкой всё-таки
-        super().__init__()
-        self.conditions = conditions
-
-    @property
-    def childs(self):
-        return self.conditions or EMPTY_COND_EXPR
-
-    def __str__(self) -> str:
-        return "conditions"
 
 
 class Join(Enum):
@@ -222,11 +193,13 @@ class SelectNode(AstNode):
         self.having = having
         self.order = order
 
-    @property
+    @property  # todo: сделать ноды для всех (по умолчанию будет значение without..., но можно проинициализировать)
     def childs(self):  # -> Tuple[AstNode]:
         return [self.selects, self.from_,
-                self.where or EMPTY_EXPR, self.group or EMPTY_EXPRS, self.having or EMPTY_EXPR,
-                self.order or EMPTY_EXPRS]
+                self.where or IdentNode("WITHOUT_WHERE"),
+                self.group or IdentNode("WITHOUT_GROUP_BY"),
+                self.having or IdentNode("WITHOUT_HAVING"),
+                self.order or IdentNode("WITHOUT_ORDER")]
 
     def __str__(self) -> str:
         return 'select'

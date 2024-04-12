@@ -247,21 +247,74 @@ def p_separated_exprs(t):  # с помощью этого разбирается
     t[0] = [*t[1], *t[3]] if len(t) > 2 else [t[1]]
 
 
-def p_exprs(t):  # todo лишняя прослойка
+def p_exprs(t):
     ''' exprs : separated_exprs '''
     t[0] = ExprsNode(*t[1])
 
 
-def p_select(t):  # todo: ещё функции max, count, avg, sum
+def p_exprs_for_group_by(t):
+    ''' exprs_for_group_by : separated_exprs '''
+    t[0] = GroupByNode(*t[1])
+
+
+def p_exprs_for_order_by(t):  # todo: не придумал, как сделать, чтобы можно было оставлять пустым
+    ''' exprs_for_order_by : separated_exprs '''
+    t[0] = OrderByNode(*t[1])
+    # if len(t) == 1:
+    #     t[0] = None
+    # elif len(t) == 2:
+    #     t[0] = OrderByNode(*t[1])
+
+
+def p_select(t):  # todo: ещё функции max, count, avg, sum ; доработать having
     ''' select : SELECT exprs FROM join
                 | SELECT exprs FROM join WHERE expr
-                | SELECT exprs FROM join GROUP BY expr
-                | SELECT exprs FROM join WHERE expr GROUP BY expr
+                | SELECT exprs FROM join WHERE expr GROUP BY exprs_for_group_by
+                | SELECT exprs FROM join GROUP BY exprs_for_group_by
+
+                | SELECT exprs FROM join WHERE expr GROUP BY exprs_for_group_by HAVING expr
+                | SELECT exprs FROM join WHERE expr GROUP BY exprs_for_group_by HAVING expr ORDER BY exprs_for_order_by
+
+                | SELECT exprs FROM join GROUP BY exprs_for_group_by HAVING expr
+                | SELECT exprs FROM join GROUP BY exprs_for_group_by HAVING expr ORDER BY exprs_for_order_by
     '''
-    if len(t) == 5:
-        t[0] = SelectNode(t[2], t[4])
-    elif t[5] == 'where':
-        t[0] = SelectNode(t[2], t[4], t[6])
+
+    select_node = None
+    from_node = None
+    where_node = None
+    group_node = None
+    having_node = None
+    order_node = None
+
+    for i in range(len(t)):
+        if t[i] == 'select':
+            select_node = t[i+1]
+        elif t[i] == 'from':
+            from_node = t[i+1]
+        elif t[i] == 'where':
+            where_node = t[i+1]
+        elif t[i] == 'group':
+            group_node = t[i + 2]
+        elif t[i] == 'having':
+            having_node = t[i + 1]  # todo
+        elif t[i] == 'order':
+            order_node = t[i + 2]  # todo
+
+    t[0] = SelectNode(select_node, from_node, where_node, group_node, having_node, order_node)
+
+    # if len(t) == 5:
+    #     t[0] = SelectNode(t[2], t[4])
+    # elif t[5] == 'where':
+    #     if len(t) > 7 and t[7] == 'group':
+    #         exprs_node = t[2]
+    #         join_node = t[4]
+    #         where_node = t[6]
+    #         group_node = t[9]
+    #         t[0] = SelectNode(exprs_node, join_node, where_node, group_node)
+    #     else:
+    #         t[0] = SelectNode(t[2], t[4], t[6])
+    # elif t[5] == 'group':
+    #     t[0] = SelectNode(t[2], t[4], None, t[7])
 
 
 def p_error(t):
@@ -274,6 +327,3 @@ parser = yacc.yacc()
 def build_tree(s):
     result = parser.parse(s)
     return result.tree
-
-# todo потом сюда добавлять все остальные операции: груп бай и тд!!!!!!!
-# todo убрать, чтобы не было лишних генераций (типа единички)

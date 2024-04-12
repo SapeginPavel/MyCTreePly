@@ -177,13 +177,35 @@ class ExprsNode(AstNode):
         return '...'
 
 
-EMPTY_EXPR = NumNode(1)
-EMPTY_EXPRS = ExprsNode()
+class GroupByNode(AstNode):
+    def __init__(self, *exprs: ExprNode):
+        super().__init__()
+        self.exprs = exprs
+
+    @property
+    def childs(self) -> Tuple[ExprNode]:
+        return self.exprs
+
+    def __str__(self) -> str:
+        return 'group by'
+
+
+class OrderByNode(AstNode):
+    def __init__(self, *exprs: ExprNode):
+        super().__init__()
+        self.exprs = exprs
+
+    @property
+    def childs(self) -> Tuple[ExprNode]:
+        return self.exprs
+
+    def __str__(self) -> str:
+        return 'order by'
 
 
 class SelectNode(AstNode):
     def __init__(self, select_: ExprsNode, from_: Union[IdentNode, JoinNode],
-                 where: Optional[ExprNode] = None, group: Optional[ExprsNode] = None,
+                 where: Optional[ExprNode] = None, group: Optional[GroupByNode] = None,
                  having: Optional[ExprNode] = None, order: Optional[ExprsNode] = None):
         super().__init__()
         self.selects = select_
@@ -193,7 +215,7 @@ class SelectNode(AstNode):
         self.having = having
         self.order = order
 
-    @property  # todo: сделать ноды для всех (по умолчанию будет значение without..., но можно проинициализировать)
+    @property
     def childs(self):  # -> Tuple[AstNode]:
         return [self.selects, self.from_,
                 self.where or IdentNode("WITHOUT_WHERE"),
@@ -203,3 +225,6 @@ class SelectNode(AstNode):
 
     def __str__(self) -> str:
         return 'select'
+
+
+

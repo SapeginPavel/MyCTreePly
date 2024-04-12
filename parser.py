@@ -58,7 +58,7 @@ t_RBRACE = r'}'
 t_SEMICOLON = r';'
 t_GT = r'>'
 t_LT = r'<'
-t_EQUALS = r'='
+t_EQUALS = r'=='
 t_NOTEQUALS = r'!='
 t_GE = r'>='
 t_LE = r'<='
@@ -186,6 +186,9 @@ def p_compare(t):
             | add EQUALS add
             | add NOTEQUALS add
     '''
+    print("in compare")
+    for i in range(len(t)):
+        print(t[i])
     t[0] = BinOpNode(BinOp(t[2]), t[1], t[3]) if len(t) > 2 else t[1]
 
 
@@ -211,27 +214,47 @@ def p_expr(t):
     t[0] = t[1]
 
 
+# todo: !!!!!!!!!!!!!!!!!!!!!!!! ПОПРОБОВАТЬ нарисовать дерево, как оно должно строиться
 def p_join_cond(t):
     ''' join_cond :
-                | join_cond ident EQUALS ident
+                | ident EQUALS ident
     '''
-    if len(t) == 5:
-        pass
+    # todo: вместо EQUALS - compare !!!      | join_cond ident compare ident
+    print("refrg")
+    # t[0] = BinOpNode(BinOp(t[2]), t[1], t[3])
+    if len(t) == 1:
+        print("1")
+        t[0] = NumNode(2)
+    elif len(t) == 4:
+        print("2")
+        # t[0] = BinOpNode(BinOp(t[2]), t[1], t[3])
+        t[0] = NumNode(2)
+
+    # elif len(t) == 5:
+    #     print("3")
+    #     # t[0] = ConditionsNode(tuple[t[1], BinOpNode(BinOp(t[2]), t[1], t[3])])
+    #     # tup = tuple[*t[1], BinOpNode(BinOp(t[2]), t[1], t[3])]
+    #     # t[0] = ConditionsNode(tup)
+    #     tup = (t[1],) + (BinOpNode(BinOp(t[2]), t[1], t[3]),)  # формирование кортежа
+    #     t[0] = ConditionsNode(tup)
 
 
 def p_join(t):
     ''' join : ident
-            | join LEFT JOIN ident ON join_cond
+            | join LEFT JOIN ident ON expr
             | join RIGHT JOIN ident ON expr
             | join FULL JOIN ident ON expr
             | join INNER JOIN ident ON expr
             | join CROSS JOIN ident
     '''
+    for i in range(len(t)):
+        print(t[i])
     if len(t) == 2:
-        t[0] = t[1]
+        t[0] = t[1]  # и тогда вернётся IdentNode
     else:
+        print("in join")
         cond = t[6] if len(t) > 6 else None
-        t[0] = JoinNode(Join(t[2]), t[1], t[4], cond)
+        t[0] = JoinNode(Join(t[2]), t[1], t[4], cond)  # а тут JoinNode
 
 
 # 4

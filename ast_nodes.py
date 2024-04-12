@@ -1,3 +1,4 @@
+from _ast import Expression
 from abc import ABC, abstractmethod
 from typing import Callable, Tuple, Optional, Union
 from enum import Enum
@@ -131,6 +132,22 @@ class UnOpNode(ValueNode):
         return str(self.op.value)
 
 
+EMPTY_COND_EXPR = NumNode(404)
+
+
+class ConditionsNode(AstNode):
+    def __init__(self, conditions: Optional[tuple[BinOpNode]] = None):  # не знаю, можно ли так. Мб со звёздочкой всё-таки
+        super().__init__()
+        self.conditions = conditions
+
+    @property
+    def childs(self):
+        return self.conditions or EMPTY_COND_EXPR
+
+    def __str__(self) -> str:
+        return "conditions"
+
+
 class Join(Enum):
     LEFT = 'left'
     RIGHT = 'right'
@@ -140,12 +157,15 @@ class Join(Enum):
 
 
 class JoinNode(AstNode):
-    def __init__(self, join: Join, table1: IdentNode, table2: IdentNode, cond: Optional[BinOpNode]):  # ExprNode
+    def __init__(self, join: Join, table1: IdentNode, table2: IdentNode, cond: Optional[ExprNode]):  # ExprNode
         super().__init__()
         self.join = join
         self.table1 = table1
         self.table2 = table2
         self.cond = cond
+        print("!JoinNode created!")
+        print("!JoinNode created!")
+        print("!JoinNode created!")
 
     @property
     def childs(self):  # -> Tuple[ExprNode]:
@@ -169,7 +189,7 @@ class ExprsNode(AstNode):
         return self.exprs
 
     def __str__(self) -> str:
-        return 'columns'
+        return 'exprs'
 
 
 EMPTY_EXPR = NumNode(1)
@@ -177,19 +197,22 @@ EMPTY_EXPRS = ExprsNode()
 
 
 class SelectNode(AstNode):
-    def __init__(self, selects: ExprsNode, from_: Union[IdentNode, JoinNode],
+    def __init__(self, select_: ExprsNode, from_: Union[IdentNode, JoinNode],
                  where: Optional[ExprNode] = None, group: Optional[ExprsNode] = None,
                  having: Optional[ExprNode] = None, order: Optional[ExprsNode] = None):
         super().__init__()
-        self.selects = selects
+        self.selects = select_
         self.from_ = from_
         self.where = where
         self.group = group
         self.having = having
         self.order = order
+        print("!SelectNode created!")
+        print("!SelectNode created!")
+        print("!SelectNode created!")
 
     @property
-    def childs(self): # -> Tuple[AstNode]:
+    def childs(self):  # -> Tuple[AstNode]:
         return [self.selects, self.from_,
                 self.where or EMPTY_EXPR, self.group or EMPTY_EXPRS, self.having or EMPTY_EXPR,
                 self.order or EMPTY_EXPRS]

@@ -58,8 +58,7 @@ s1 = '''int a = -(2 + 1);
 
 s2 = '''
     select age, name, sur
-        from table 
-        left join t2 on g = h
+        from table left join t2 on first == second
         where age > 7
 '''
 
